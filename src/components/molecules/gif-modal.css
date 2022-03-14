@@ -1,0 +1,40 @@
+.gif_modal {
+}
+
+.gif_modal .ant-modal-content {
+}
+
+.gif_modal .ant-modal-content .ant-modal-header {
+  width: 100%;
+  background-image: linear-gradient(
+    to right,
+    #fff35c,
+    #00ff99,
+    #00ccff,
+    #9933ff,
+    #ff6666
+  );
+  background-size: 600% 100%;
+  animation: gradient 3s infinite alternate;
+}
+
+.gif_modal .ant-modal-content .ant-modal-header .ant-modal-title {
+  font-weight: bold;
+  font-size: 14px;
+}
+
+.gif_modal .ant-modal-content .ant-modal-body {
+  background: #181818;
+}
+
+.gif_modal .ant-carousel {
+  height: 100%;
+}
+
+.gif_modal .ant-carousel > .slick-slider {
+  height: inherit;
+}
+
+.gif_modal .ant-carousel .slick-dots li button {
+  height: 10px;
+}

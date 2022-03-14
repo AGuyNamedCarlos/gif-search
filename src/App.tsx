@@ -1,26 +1,37 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React from "react";
+import Modal from "./components/atoms/modal";
+import Giphy from "./pages/giphy";
+import { env } from "./env";
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
-}
+const App = () => {
+  if (
+    env.REACT_APP_API_KEY === null ||
+    env.REACT_APP_API_KEY === undefined ||
+    env.REACT_APP_API_KEY === ""
+  ) {
+    return (
+      <>
+        {Modal.error({
+          visible: true,
+          maskClosable: false,
+          mask: false,
+          keyboard: false,
+          title: "Missing API Key",
+          content: (
+            <div>
+              <p>
+                The following environment variable was not found:
+                REACT_APP_API_KEY.
+              </p>
+              <p>Please set it up and try again.</p>
+            </div>
+          ),
+          okButtonProps: { style: { display: "none" } },
+        })}
+      </>
+    );
+  }
+  return <Giphy />;
+};
 
 export default App;
