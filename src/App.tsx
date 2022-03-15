@@ -1,4 +1,5 @@
 import React from "react";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Modal from "./components/atoms/Modal";
 import Giphy from "./pages/Giphy";
 
@@ -26,7 +27,13 @@ const App = () => {
       </>
     );
   }
-  return <Giphy />;
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route index element={<Giphy />}></Route>
+      </Routes>
+    </BrowserRouter>
+  );
 };
 
 export default App;

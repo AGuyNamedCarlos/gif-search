@@ -1,4 +1,5 @@
 import React from "react";
+import { MemoryRouter } from "react-router-dom";
 import {
   cleanup,
   render,
@@ -17,19 +18,31 @@ beforeEach(jest.useFakeTimers);
 
 describe("Render Components", () => {
   test("Input rendered correctly", async () => {
-    render(<Giphy />);
+    render(
+      <MemoryRouter>
+        <Giphy />
+      </MemoryRouter>
+    );
     const input = await screen.findByTestId("search-input");
     expect(input).toBeInTheDocument();
   });
 
   test("Clear button renders with Clear Search", async () => {
-    render(<Giphy />);
+    render(
+      <MemoryRouter>
+        <Giphy />
+      </MemoryRouter>
+    );
     const button = await screen.findByTestId("clear-button");
     expect(button.textContent).toBe("Clear Search");
   });
 
   test("Pagination Component renders correctly", async () => {
-    render(<Giphy />);
+    render(
+      <MemoryRouter>
+        <Giphy />
+      </MemoryRouter>
+    );
     const pagination = await screen.findByTestId("pagination-component");
     expect(pagination).toBeInTheDocument();
   });
@@ -37,7 +50,11 @@ describe("Render Components", () => {
 
 describe("Set Values", () => {
   test("Should be able to type in input", async () => {
-    render(<Giphy />);
+    render(
+      <MemoryRouter>
+        <Giphy />
+      </MemoryRouter>
+    );
     const input = await screen.findByTestId("search-input");
 
     fireEvent.change(input, { target: { value: "Mountain" } });
@@ -45,7 +62,11 @@ describe("Set Values", () => {
   });
 
   test("Should empty input when Clear Search is clicked", async () => {
-    render(<Giphy />);
+    render(
+      <MemoryRouter>
+        <Giphy />
+      </MemoryRouter>
+    );
     const input = await screen.findByTestId("search-input");
     const button = await screen.findByTestId("clear-button");
     fireEvent.change(input, { target: { value: "Mountain" } });
@@ -57,7 +78,11 @@ describe("Set Values", () => {
 
 describe("Fetching Data", () => {
   test("Should load the gif container component after first fetch", async () => {
-    render(<Giphy />);
+    render(
+      <MemoryRouter>
+        <Giphy />
+      </MemoryRouter>
+    );
 
     const gifContainer = await screen.findByTestId("gif-container");
     expect(gifContainer).toBeInTheDocument();
@@ -75,7 +100,11 @@ describe("Fetching Data", () => {
   });
 
   test("Typing in input should trigger the searchData function", async () => {
-    render(<Giphy />);
+    render(
+      <MemoryRouter>
+        <Giphy />
+      </MemoryRouter>
+    );
     await waitFor(async () => {
       const gifContainer = await screen.findByTestId("gif-container");
       expect(gifContainer).toBeInTheDocument();

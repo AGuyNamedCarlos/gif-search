@@ -1,24 +1,38 @@
 import styled from "styled-components";
 
-export const GifContainer = styled.div`
-  margin: 0 auto;
-  width: 95%;
-  height: 1080px;
+export const MainDiv = styled.div`
+  width: 60%;
+  text-align: center;
 `;
 
-export const ImagesDiv = styled.div`
+export const RowDiv = styled.div`
+  margin-top: 10px;
+`;
+
+export const GifContainer = styled.div`
+  margin: 0 auto;
+  max-width: 80%;
+  height: 1080px;
   display: flex;
   flex-direction: column;
   flex-wrap: wrap;
-  max-height: 100%;
+  align-items: center;
+  flex: 1 1 auto;
+
+  @media (max-width: 1330px) {
+    height: 1300px;
+  }
+
+  @media (max-width: 915px) {
+    height: 1800px;
+  }
 `;
 
 export const Img = styled.img`
+  max-height: 100%;
   cursor: pointer;
   display: block;
-  float: left;
-  flex: 0 0 auto;
-  margin: 8px;
+  margin: 4px;
 `;
 
 export const SpinDiv = styled.div`

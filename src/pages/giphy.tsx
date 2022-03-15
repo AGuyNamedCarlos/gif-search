@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useCallback, useMemo } from "react";
+import { useSearchParams } from "react-router-dom";
 
 import axios from "axios";
 
@@ -12,7 +13,6 @@ import {
 import notification from "../components/atoms/Notification";
 import ContentLayout from "../components/molecules/Layout";
 import Input from "../components/atoms/Input";
-import Col from "../components/atoms/Col";
 import Button from "../components/atoms/Button";
 import Pagination from "../components/atoms/Pagination";
 import GifModal from "../components/molecules/GifModal";
@@ -24,10 +24,11 @@ import LoadingContext from "../contexts/loading-context";
 import { Gif, GiphyResponse } from "../@types/giphy.types";
 import {
   GifContainer,
-  ImagesDiv,
   Img,
   SpinDiv,
   TitleDiv,
+  MainDiv,
+  RowDiv,
 } from "./Giphy.styles";
 interface IPagination {
   totalItems: number;
@@ -37,7 +38,7 @@ interface IPagination {
 const Giphy = () => {
   const [data, setData] = useState<Gif[]>([]);
   const [loading, setLoading] = useState(false);
-  const [searchParam, setSearchParam] = useState("");
+  const [searchValue, setSearchValue] = useState("");
   const [selectedGif, setSelectedGif] = useState<Gif>();
   const [paginationState, setPaginationState] = useState<IPagination>(
     defaultPaginationState
@@ -45,6 +46,15 @@ const Giphy = () => {
   const [itemsPerPage, setItemsPerPage] = useState(defaultItemsPerPage);
   const [currentPage, setCurrentPage] = useState(defaultCurrentPage);
   const [title, setTitle] = useState("");
+
+  let [searchParams, setSearchParams] = useSearchParams();
+
+  useEffect(() => {
+    const search = searchParams.get("search");
+    if (search) {
+      setSearchValue(search);
+    }
+  }, [searchParams]);
 
   // Used to determine which "page" we have to call.
   const offset = useMemo(() => {
@@ -93,7 +103,7 @@ const Giphy = () => {
 
   // Queried Search for gifs
   const searchData = useCallback(async () => {
-    if (!!searchParam) {
+    if (!!searchValue) {
       try {
         setLoading(true);
         const { data, status } = await axios.get<GiphyResponse>(
@@ -102,7 +112,7 @@ const Giphy = () => {
             params: {
               offset,
               api_key: API_KEY,
-              q: searchParam,
+              q: searchValue,
               limit: itemsPerPage,
             },
           }
@@ -111,7 +121,7 @@ const Giphy = () => {
         if (status === 200) {
           const { data: items = [], pagination } = data;
           setTitle(
-            searchParam
+            searchValue
               .split(" ")
               .map(
                 (title) =>
@@ -119,6 +129,7 @@ const Giphy = () => {
               )
               .join(" ")
           );
+
           setData(items);
           setPaginationState({
             totalItems: pagination.total_count,
@@ -132,7 +143,20 @@ const Giphy = () => {
         setLoading(false);
       }
     }
-  }, [searchParam, itemsPerPage, offset]);
+  }, [searchValue, itemsPerPage, offset]);
+
+  /*
+    The Giphy API does not always return the same total_count when moving through pages.
+    If the user clicks a page that does not have anything, this function will get the actual
+    last page and redirect to it.
+  */
+  useEffect(() => {
+    const { totalItems } = paginationState;
+    if (data.length === 0 && totalItems !== 0) {
+      const newLastPage = Math.ceil(totalItems / itemsPerPage);
+      setCurrentPage(newLastPage);
+    }
+  }, [data, itemsPerPage, paginationState]);
 
   useEffect(() => {
     if (loading) {
@@ -141,12 +165,12 @@ const Giphy = () => {
   }, [loading]);
 
   const getData = useCallback(() => {
-    if (searchParam) {
+    if (searchValue) {
       searchData();
     } else {
       fetchTrending();
     }
-  }, [searchData, fetchTrending, searchParam]);
+  }, [searchData, fetchTrending, searchValue]);
 
   useEffect(() => {
     let timeout = window.setTimeout(async () => {
@@ -155,10 +179,16 @@ const Giphy = () => {
     return () => {
       window.clearTimeout(timeout);
     };
-  }, [searchParam, getData]);
+  }, [searchValue, getData]);
+
+  useEffect(() => {
+    setSearchParams({
+      ...(searchValue && { search: searchValue }),
+    });
+  }, [searchValue, setSearchParams]);
 
   const onInputChange = (event: any) => {
-    setSearchParam(event.target.value);
+    setSearchValue(event.target.value);
     setCurrentPage(1);
   };
 
@@ -168,7 +198,7 @@ const Giphy = () => {
   };
 
   const clearSearch = () => {
-    setSearchParam("");
+    setSearchValue("");
     setCurrentPage(1);
   };
 
@@ -182,7 +212,7 @@ const Giphy = () => {
 
   const renderGifs = () => {
     return (
-      <ImagesDiv data-testid="gif-container">
+      <>
         {data.map((element: any, idx) => {
           return (
             <Img
@@ -194,7 +224,7 @@ const Giphy = () => {
             />
           );
         })}
-      </ImagesDiv>
+      </>
     );
   };
 
@@ -202,25 +232,20 @@ const Giphy = () => {
   return (
     <LoadingContext.Provider value={{ loading: loading }}>
       <ContentLayout>
-        <div
-          className="ant-row ant-row-center"
-          style={{ rowGap: "5px", marginLeft: "-16px", marginRight: "-16px" }}
-        >
-          <Col span={14} offset={4}>
-            <Input.Group>
-              <Input
-                style={{ width: "calc(100% - 200px)" }}
-                data-testid="search-input"
-                value={searchParam}
-                onChange={onInputChange}
-                placeholder="Type to search"
-              />
-              <Button data-testid="clear-button" onClick={clearSearch}>
-                Clear Search
-              </Button>
-            </Input.Group>
-          </Col>
-          <Col span={12} offset={6}>
+        <MainDiv>
+          <RowDiv>
+            <Input
+              style={{ width: "calc(60% - 200px)" }}
+              data-testid="search-input"
+              value={searchValue}
+              onChange={onInputChange}
+              placeholder="Type to search"
+            />
+            <Button data-testid="clear-button" onClick={clearSearch}>
+              Clear Search
+            </Button>
+          </RowDiv>
+          <RowDiv>
             <Pagination
               data-testid="pagination-component"
               showLessItems={true}
@@ -232,20 +257,22 @@ const Giphy = () => {
               onChange={onPageChange}
               showSizeChanger={false}
             />
-          </Col>
-          <Col span={22}>
+          </RowDiv>
+          <RowDiv>
             <TitleDiv className={loadingTime}>{title}</TitleDiv>
-          </Col>
-          <Col span={24}>
+          </RowDiv>
+          <RowDiv>
             {!loading && data.length > 0 ? (
-              <GifContainer>{renderGifs()}</GifContainer>
+              <GifContainer data-testid="gif-container">
+                {renderGifs()}
+              </GifContainer>
             ) : (
               <SpinDiv>
                 <Spin size="large" />
               </SpinDiv>
             )}
-          </Col>
-        </div>
+          </RowDiv>
+        </MainDiv>
         {!!selectedGif && (
           <GifModal visible={true} gif={selectedGif} onClose={onCloseModal} />
         )}
