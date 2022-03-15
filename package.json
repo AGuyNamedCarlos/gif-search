@@ -47,7 +47,6 @@
     ]
   },
   "devDependencies": {
-    "react-inject-env": "^2.1.0",
     "styled-components": "^5.3.3"
   }
 }

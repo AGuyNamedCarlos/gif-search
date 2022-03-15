@@ -1,6 +1,6 @@
 import React from "react";
 import { cleanup, render, screen, waitFor } from "@testing-library/react";
-import GifModal from "../gif-modal";
+import GifModal from "../GifModal";
 
 afterEach(cleanup);
 afterEach(jest.clearAllMocks);

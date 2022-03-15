@@ -5,9 +5,8 @@ import {
   screen,
   fireEvent,
   waitFor,
-  queryHelpers,
 } from "@testing-library/react";
-import Giphy from "../giphy";
+import Giphy from "../Giphy";
 import mockedAxios from "axios";
 import { act } from "react-dom/test-utils";
 

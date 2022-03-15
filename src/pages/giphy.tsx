@@ -1,8 +1,7 @@
 import React, { useEffect, useState, useCallback, useMemo } from "react";
-import useDebounce from "../hooks/useDebounce";
 
 import axios from "axios";
-import styled from "styled-components";
+
 import {
   API_KEY,
   defaultItemsPerPage,
@@ -10,115 +9,62 @@ import {
   defaultPaginationState,
   MAX_GIPHY_OFFSET,
 } from "../constants/consts";
-import notification from "../components/atoms/notification";
-import ContentLayout from "../components/molecules/layout";
-import Input from "../components/atoms/input";
-import Col from "../components/atoms/col";
-import Button from "../components/atoms/button";
-import Pagination from "../components/atoms/pagination";
-import GifModal from "../components/molecules/gif-modal";
+import notification from "../components/atoms/Notification";
+import ContentLayout from "../components/molecules/Layout";
+import Input from "../components/atoms/Input";
+import Col from "../components/atoms/Col";
+import Button from "../components/atoms/Button";
+import Pagination from "../components/atoms/Pagination";
+import GifModal from "../components/molecules/GifModal";
 
-import Spin from "../components/atoms/spinner";
+import Spin from "../components/atoms/Spinner";
 
 import LoadingContext from "../contexts/loading-context";
 
-const GifContainer = styled.div`
-  margin: 0 auto;
-  width: 95%;
-  height: 1080px;
-`;
-
-const ImagesDiv = styled.div`
-  display: flex;
-  flex-direction: column;
-  flex-wrap: wrap;
-  max-height: 100%;
-`;
-
-const Img = styled.img`
-  cursor: pointer;
-  display: block;
-  float: left;
-  flex: 0 0 auto;
-  margin: 8px;
-`;
-
-const SpinDiv = styled.div`
-  text-align: center;
-`;
-
-const TitleDiv = styled.div`
-  background: linear-gradient(
-    to right,
-    #fff35c 20%,
-    #00ff99 40%,
-    #00ccff 60%,
-    #9933ff 80%,
-    #ff6666 100%
-  );
-  background-size: 200% auto;
-  font-size: 24px;
-  color: #000;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  font-weight: bold;
-
-  &.loading_time {
-    text-align: center;
-  }
-
-  animation: shine 3s linear infinite;
-  @keyframes shine {
-    to {
-      background-position: 200%;
-    }
-  }
-`;
-
+import { Gif, GiphyResponse } from "../@types/giphy.types";
+import {
+  GifContainer,
+  ImagesDiv,
+  Img,
+  SpinDiv,
+  TitleDiv,
+} from "./Giphy.styles";
 interface IPagination {
   totalItems: number;
   items: number;
 }
 
 const Giphy = () => {
-  const [data, setData] = useState([]);
+  const [data, setData] = useState<Gif[]>([]);
   const [loading, setLoading] = useState(false);
   const [searchParam, setSearchParam] = useState("");
-  const [selectedGif, setSelectedGif] = useState({});
-  const [showModal, setShowModal] = useState(false);
+  const [selectedGif, setSelectedGif] = useState<Gif>();
   const [paginationState, setPaginationState] = useState<IPagination>(
     defaultPaginationState
   );
   const [itemsPerPage, setItemsPerPage] = useState(defaultItemsPerPage);
   const [currentPage, setCurrentPage] = useState(defaultCurrentPage);
+  const [title, setTitle] = useState("");
 
   // Used to determine which "page" we have to call.
   const offset = useMemo(() => {
     return Math.min(itemsPerPage * (currentPage - 1), MAX_GIPHY_OFFSET);
   }, [itemsPerPage, currentPage]);
 
-  const title = useMemo(() => {
-    if (!!loading) return "Loading Awesome Gifs!";
-
-    if (!searchParam) {
-      return "Trending Gifs!";
-    }
-
-    const arr = searchParam.split(" ");
-
-    for (var i = 0; i < arr.length; i++) {
-      arr[i] = arr[i].charAt(0).toUpperCase() + arr[i].slice(1);
-    }
-    const capitalizedSearch = arr.join(" ");
-
-    return `${capitalizedSearch} Gifs!`;
-  }, [data, loading]);
+  const showErrorMessage = () => {
+    notification.error({
+      message: "Error",
+      description: "Unable to load gifs. Please try again in a few seconds.",
+      duration: 5,
+      placement: "topRight",
+    });
+  };
 
   // Default call without any query
   const fetchTrending = useCallback(async () => {
     try {
       setLoading(true);
-      const { data, status } = await axios.get(
+      const { data, status } = await axios.get<GiphyResponse>(
         "http://api.giphy.com/v1/gifs/trending",
         {
           params: {
@@ -129,27 +75,28 @@ const Giphy = () => {
         }
       );
       if (status === 200) {
-        const { data: items = [], pagination = {} } = data;
+        const { data: items = [], pagination } = data;
+        setTitle("Trending Gifs!");
         setData(items);
         setPaginationState({
           totalItems: pagination.total_count,
           items: items.length,
         });
-        setLoading(false);
       }
     } catch (error) {
       setData([]);
-      setLoading(false);
       showErrorMessage();
+    } finally {
+      setLoading(false);
     }
-  }, [searchParam, currentPage, itemsPerPage]);
+  }, [itemsPerPage, offset]);
 
   // Queried Search for gifs
   const searchData = useCallback(async () => {
     if (!!searchParam) {
       try {
         setLoading(true);
-        const { data, status } = await axios.get(
+        const { data, status } = await axios.get<GiphyResponse>(
           "http://api.giphy.com/v1/gifs/search",
           {
             params: {
@@ -162,57 +109,57 @@ const Giphy = () => {
         );
 
         if (status === 200) {
-          const { data: items = [], pagination = {} } = data;
-
+          const { data: items = [], pagination } = data;
+          setTitle(
+            searchParam
+              .split(" ")
+              .map(
+                (title) =>
+                  `${title.charAt(0).toUpperCase()}${title.slice(1)} Gifs!`
+              )
+              .join(" ")
+          );
           setData(items);
           setPaginationState({
             totalItems: pagination.total_count,
             items: items.length,
           });
-          setLoading(false);
         }
       } catch (error) {
         setData([]);
-        setLoading(false);
         showErrorMessage();
+      } finally {
+        setLoading(false);
       }
     }
-  }, [searchParam, itemsPerPage, currentPage]);
+  }, [searchParam, itemsPerPage, offset]);
 
   useEffect(() => {
-    if (!!searchParam) {
+    if (loading) {
+      setTitle("Loading Awesome Gifs!");
+    }
+  }, [loading]);
+
+  const getData = useCallback(() => {
+    if (searchParam) {
       searchData();
     } else {
       fetchTrending();
     }
-  }, [currentPage, itemsPerPage]);
+  }, [searchData, fetchTrending, searchParam]);
 
-  const debounceSearch = () => {
-    if (!!searchParam) {
-      searchData();
-    } else if (currentPage !== 1) {
-      setCurrentPage(1);
-      fetchTrending();
-    }
-  };
-
-  // Allow for search as the user types
-  useDebounce(debounceSearch, [searchParam], 1000);
-
-  const showErrorMessage = () => {
-    notification.error({
-      message: "Error",
-      description: "Unable to load gifs. Please try again in a few seconds.",
-      duration: 5,
-      placement: "topRight",
-    });
-  };
+  useEffect(() => {
+    let timeout = window.setTimeout(async () => {
+      getData();
+    }, 500);
+    return () => {
+      window.clearTimeout(timeout);
+    };
+  }, [searchParam, getData]);
 
   const onInputChange = (event: any) => {
     setSearchParam(event.target.value);
-    if (event.target.value === "") {
-      fetchTrending();
-    }
+    setCurrentPage(1);
   };
 
   const onPageChange = (page: number, pageSize: number) => {
@@ -223,17 +170,14 @@ const Giphy = () => {
   const clearSearch = () => {
     setSearchParam("");
     setCurrentPage(1);
-    fetchTrending();
   };
 
-  const selectGif = (element: any) => {
-    setSelectedGif(element);
-    setShowModal(true);
+  const selectGif = (gif: Gif) => {
+    setSelectedGif(gif);
   };
 
   const onCloseModal = () => {
-    setShowModal(false);
-    setSelectedGif({});
+    setSelectedGif(undefined);
   };
 
   const renderGifs = () => {
@@ -302,11 +246,9 @@ const Giphy = () => {
             )}
           </Col>
         </div>
-        <GifModal
-          visible={showModal}
-          gif={selectedGif}
-          onClose={onCloseModal}
-        />
+        {!!selectedGif && (
+          <GifModal visible={true} gif={selectedGif} onClose={onCloseModal} />
+        )}
       </ContentLayout>
     </LoadingContext.Provider>
   );

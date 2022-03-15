@@ -1,14 +1,9 @@
 import React from "react";
-import Modal from "./components/atoms/modal";
-import Giphy from "./pages/giphy";
-import { env } from "./env";
+import Modal from "./components/atoms/Modal";
+import Giphy from "./pages/Giphy";
 
 const App = () => {
-  if (
-    env.REACT_APP_API_KEY === null ||
-    env.REACT_APP_API_KEY === undefined ||
-    env.REACT_APP_API_KEY === ""
-  ) {
+  if (!process.env.REACT_APP_API_KEY) {
     return (
       <>
         {Modal.error({

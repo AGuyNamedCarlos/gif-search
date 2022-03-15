@@ -1,11 +1,11 @@
 import React from "react";
 
-import Layout, { Content, ILayoutProps } from "../atoms/layout";
+import Layout, { Content, ILayoutProps } from "../atoms/Layout";
 
 import styled from "styled-components";
 
 const ContentLayoutWrapper = styled(Layout)`
-  height: 100%;
+  height: 100vh;
   max-height: 100%;
   min-height: 100%;
   overflow: hidden;
