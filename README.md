@@ -7,6 +7,8 @@ https://github.com/Giphy/GiphyAPI
 ### `Please provide a valid Giphy API key when running this app`
 
 See the file .env.example for an example on how to set the API key.
+
+To start the application simply run `yarn start`
 ##
 
 # `Usage`
