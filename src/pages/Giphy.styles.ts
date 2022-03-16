@@ -19,12 +19,12 @@ export const GifContainer = styled.div`
   align-items: center;
   flex: 1 1 auto;
 
-  @media (max-width: 1330px) {
-    height: 1300px;
+  @media (max-width: 1400px) {
+    height: 1500px;
   }
 
-  @media (max-width: 915px) {
-    height: 1800px;
+  @media (max-width: 958px) {
+    height: 2000px;
   }
 `;
 

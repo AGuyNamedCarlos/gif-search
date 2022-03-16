@@ -34,7 +34,6 @@ const HeaderWrapper = styled.div`
   );
   background-size: 600% 100%;
   animation: gradient 3s infinite alternate;
-
   @keyframes gradient {
     0% {
       background-position: left;
@@ -49,7 +48,7 @@ const ContentLayout: React.FC<ILayoutProps> = ({ children, ...props }) => {
   return (
     <ContentLayoutWrapper>
       <HeaderWrapper></HeaderWrapper>
-      <ContentWrapper>{children}</ContentWrapper>
+      <ContentWrapper id="content-layout">{children}</ContentWrapper>
     </ContentLayoutWrapper>
   );
 };

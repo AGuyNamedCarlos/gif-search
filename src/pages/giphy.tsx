@@ -16,6 +16,7 @@ import Input from "../components/atoms/Input";
 import Button from "../components/atoms/Button";
 import Pagination from "../components/atoms/Pagination";
 import GifModal from "../components/molecules/GifModal";
+import ScrollTop from "../components/atoms/ScrollTop";
 
 import Spin from "../components/atoms/Spinner";
 
@@ -227,7 +228,6 @@ const Giphy = () => {
       </>
     );
   };
-
   const loadingTime = !!loading ? "loading_time" : "";
   return (
     <LoadingContext.Provider value={{ loading: loading }}>
@@ -277,6 +277,7 @@ const Giphy = () => {
           <GifModal visible={true} gif={selectedGif} onClose={onCloseModal} />
         )}
       </ContentLayout>
+      <ScrollTop elementId={"content-layout"} />
     </LoadingContext.Provider>
   );
 };
